@@ -1,0 +1,10 @@
+fastapi
+websockets
+strawberry
+jose 
+pydantic 
+passlib
+datetime 
+typing 
+SQLAlchemy 
+PyMySQL
