@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Command Interface</title>
+    <!-- Bootstrap CSS for styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        body {
+            padding-top: 56px; /* Space for fixed navbar */
+        }
+        .sidebar {
+            position: fixed;
+            top: 56px; /* Height of navbar */
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            padding: 48px 0 0; /* Space for top navigation icons */
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        }
+        .sidebar-sticky {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0; /* Space for top navigation icons */
+            height: calc(100vh - 48px);
+            padding-top: .5rem;
+            overflow-x: hidden;
+            overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const ws = new WebSocket("ws://" + location.host + "/feed");
+
+            ws.onopen = function(event) {
+                console.log("Connected to WebSocket");
+                // Start sending keepalive messages every 10 seconds
+                setInterval(function() {
+                    ws.send("keepalive");
+                }, 10000); // 10000 milliseconds = 10 seconds                   
+            };
+
+            ws.onmessage = function(event) {
+                console.log("Message from server: ", event.data);
+                try {
+                    const msg = JSON.parse(event.data);
+                    // Check if the message contains a command and act on it
+                    if (msg.command) {
+                        executeCommand(msg.command);
+                    } else {
+                        // Handle normal messages
+                        document.getElementById('out').innerHTML += '<li><p>' + msg.message + '</p></li>';
+                    }
+                } catch (e) {
+                    console.error("Error parsing message:", e);
+                }
+            };
+
+            ws.onerror = function(event) {
+                console.error("WebSocket error:", event);
+            };
+
+            ws.onclose = function(event) {
+                console.log("WebSocket connection closed:", event);
+            };
+
+            // Function to send a message to the server
+            function sendMessage() {
+                const message = document.getElementById("message").value;
+                ws.send(message);
+                document.getElementById("message").value = ""; // Clear input after sending
+            }
+
+            // Execute command received from the server
+            function executeCommand(command) {
+                console.log("Executing command:", command);
+                // Implement command execution logic here
+                // Example: if (command === 'alert') { alert('Alert command received'); }
+            }
+
+            // Add event listener to the send button
+            document.getElementById("send").addEventListener("click", sendMessage);
+        });
+    </script>
+</head>
+<body>
+    <!-- Top navigation bar -->
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <a class="navbar-brand" href="#">My App</a>
+        <div class="navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/api/auth/login"><i class="fas fa-sign-in-alt"></i> Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-user"></i> Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-question-circle"></i> Help</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Sidebar navigation -->
+    <div class="d-flex">
+        <div class="sidebar bg-light">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Settings</a></li>
+                    <!-- Add more navigation items here -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content area -->
+        <div class="container-fluid">
+            <div class="breadcrumbs mt-4">
+                <!-- Breadcrumbs content -->
+            </div>
+            <div class="content">
+                <h1>WebSocket Command Interface</h1>
+                <input type="text" id="message" name="message" placeholder="Enter message">
+                <button id="send">Send</button>
+                <ul id="out"></ul>
+            </div>
+            <footer class="footer mt-auto py-3">
+                <!-- Footer content -->
+            </footer>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies (jQuery and Popper) -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+database:
+  host: localhost
+  password: password
+  port: 3306
+  user: user
+feature_flags:
+  new_feature: false
+inactivity_timeout: 30
+logging:
+  level: INFO
+  path: /var/log/myapp.log
+main_html: main.html
+port: 8000
