@@ -2,9 +2,11 @@ fastapi
 websockets
 strawberry
 jose 
+python-jose
 pydantic 
 passlib
 datetime 
 typing 
 SQLAlchemy 
 PyMySQL
+jinja2

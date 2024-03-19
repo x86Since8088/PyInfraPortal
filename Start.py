@@ -2,19 +2,61 @@ from fastapi import FastAPI, Request, WebSocket, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
+import passlib
+from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from jose import JWTError, jwt
-from passlib.context import CryptContext
-from datetime import datetime, timedelta
-
-from fastapi.responses import JSONResponse
+import subprocess
+import passlib
+import datetime
 from typing import Optional
-app = FastAPI()
+from datetime import datetime, timedelta
+import os
+import jinja2
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+ScriptFolder = os.path.dirname(os.path.realpath(__file__))
+print( 'Scriptfolder: ' + ScriptFolder)
+# Start of Auth Processing
 
+SECRET_KEY = "my_secret_key_12e@#R34t$%Y"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+class TokenData(BaseModel):
+    username: str
+    email: Optional[str] = None
+
+fake_users_db = {
+    "testuser": {
+        "username": "testuser",
+        "hashed_password": "$2b$12$somemockedhashedpasswordstring",
+        "email": "testuser@example.com",
+        "full_name": "Test User",
+        "disabled": False,
+    }
+}
+
+app = FastAPI(
+    title="ChimichangApp",
+    description="Let's code cool stuff quick and easy!",
+    summary="Deadpool's favorite app. Nuff said.",
+    version="0.0.1",
+    terms_of_service="/terms/",
+    contact={
+        "name": "Deadpoolio the Amazing",
+        "url": "/contact/",
+        "email": "dp@x-force.example.com",
+    },
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+    },
+
+)
+app.mount("/static", StaticFiles(directory=ScriptFolder+"\static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
