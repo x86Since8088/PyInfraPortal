@@ -1,6 +1,6 @@
 fastapi
 websockets
-strawberry
+#strawberry
 jose 
 python-jose
 pydantic 
@@ -10,3 +10,9 @@ typing
 SQLAlchemy 
 PyMySQL
 jinja2
+tornado
+ipython
+cryptography
+bs4
+beautifulsoup4
+lxml

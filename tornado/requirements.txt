@@ -1,3 +1,8 @@
 tornado
 PyYAML
-pydantic 
+pydantic
+pyjwt
+pandas
+tornado
+ipython
+cryptography
