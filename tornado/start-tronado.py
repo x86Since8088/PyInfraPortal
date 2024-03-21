@@ -8,7 +8,7 @@ import sys
 import os
 import yaml
 import base64
-import pysiteontornado
+import pysiteontornado as pt
 
 # yaml.= yaml.typ='safe', pure=True)
 
@@ -16,4 +16,4 @@ import pysiteontornado
 data_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
 #sys.path.insert(0, data_directory)
 
-pysiteontornado.start()
+pt.start()

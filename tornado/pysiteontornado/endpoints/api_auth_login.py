@@ -3,7 +3,7 @@ import tornado.web
 import json
 import jwt
 import datetime
-from .. import config
+from .. import data
 
 class api_auth_login(tornado.web.RequestHandler):
     async def post(self):
@@ -11,14 +11,14 @@ class api_auth_login(tornado.web.RequestHandler):
         password = self.get_body_argument("password", None)
         redirect = self.get_body_argument("redirect", None)
 
-        if username == config['AUTH_USERNAME'] and password == config['AUTH_PASSWORD']:
+        if username == PySiteConfig['AUTH_USERNAME'] and password == PySiteConfig['AUTH_PASSWORD']:
             payload = {
                 "sub": username,
                 "iat": datetime.datetime.utcnow(),
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(seconds=config['JWT']['TOKEN_EXPIRATION_SECONDS']),
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(seconds=PySiteConfig['JWT']['TOKEN_EXPIRATION_SECONDS']),
             }
-            token = jwt.encode(payload, config['JWT']['SECRET_KEY'], algorithm=config['JWT']['JWT_ALGORITHM'])
-            self.set_secure_cookie(config['JWT']['COOKIE_NAME'], token, httponly=config['JWT']['COOKIE_HTTPONLY'])
+            token = jwt.encode(payload, PySiteConfig['JWT']['SECRET_KEY'], algorithm=PySiteConfig['JWT']['JWT_ALGORITHM'])
+            self.set_secure_cookie(PySiteConfig['JWT']['COOKIE_NAME'], token, httponly=PySiteConfig['JWT']['COOKIE_HTTPONLY'])
 
             if redirect:
                 self.redirect(redirect)  # Remember to validate or sanitize the redirect URL

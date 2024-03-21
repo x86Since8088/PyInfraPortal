@@ -3,23 +3,28 @@ import fnmatch
 import importlib
 import pkgutil
 from . import data
-from . import config
 from . import endpoints
 import tornado.web
 import tornado.websocket
+import os
+import json
+import asyncio
+import time
+import sys
 
 
 data_directory = data.recommend_path(data.PathType.APPLICATION)
 
 def load_endpoints():
     endpoints_handlers = []
-    for _, name, _ in pkgutil.iter_modules(endpoints.__path__, endpoints.__name__ + "."):
-        module = importlib.import_module(name)
-        for item_name in dir(module):
-            item = getattr(module, item_name)
-            if isinstance(item, type) and issubclass(item, tornado.web.RequestHandler):
-                route = '/' + name.split('.')[-1] + '/' + item_name.lower()
-                endpoints_handlers.append((route, item))
+    module = endpoints
+    endpointlist = dir(module)
+    filtered_list = list(filter(lambda s: s.startswith('\w'), endpointlist))
+    for name in filtered_list:
+        item = getattr(module, name)
+        if isinstance(item, type) and issubclass(item, tornado.web.RequestHandler):
+            route = '/' + name.lower().replace('_', '/')
+            endpoints_handlers.append((route, item))
     return endpoints_handlers
 
 
@@ -36,19 +41,15 @@ def list_matching_functions(pattern):
     return [name for name, obj in globals().items()
             if callable(obj) and obj.__module__ == __name__ and fnmatch.fnmatch(name, pattern)]
 
-#for name in list_matching_functions("api_*"):
-#    path = name[4:].replace("_", "/")
-#    endpoints[path] = name[4:]
-
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        with open(os.path.join(data_directory, config["main_html"]), "r") as file:
+        PySiteConfig = data.get_config()
+        with open(os.path.join(PySiteConfig['project_folder'], PySiteConfig["main_html"]), "r") as file:
             file_content = file.read()
             self.write(file_content)
 
 class FeedHandler(tornado.websocket.WebSocketHandler):
     clients = set()
-
     async def open(self):
         self.last_keepalive = time.time()
         self.clients.add(self)
@@ -69,7 +70,7 @@ class FeedHandler(tornado.websocket.WebSocketHandler):
     async def keep_alive_check(self):
         while self in self.clients:
             await asyncio.sleep(1)
-            if time.time() - self.last_keepalive > config["inactivity_timeout"]:
+            if time.time() - self.last_keepalive > PySiteConfig["inactivity_timeout"]:
                 await self.close()
                 print("Closed connection due to inactivity.")
 
@@ -82,5 +83,5 @@ def make_app():
 def start():
     app = make_app()
     app.settings.keys()
-    app.listen(config["port"])
+    app.listen(data.PySiteConfig["port"])
     tornado.ioloop.IOLoop.current().start()
