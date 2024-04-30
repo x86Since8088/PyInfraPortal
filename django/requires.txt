@@ -1,5 +1,0 @@
-django-channels
-ipython
-cryptography
-channels
-channels_redis
